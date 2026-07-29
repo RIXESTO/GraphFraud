@@ -79,14 +79,22 @@ def get_data(_config):
     every time the user clicks a button.
     The leading underscore in `_config` tells Streamlit not to hash this argument.
     """
-    classes, edges, features = load_raw(_config)
-    df = build_graph_df(features, classes, _config)
-    return df, edges
+    try:
+        classes, edges, features = load_raw(_config)
+        df = build_graph_df(features, classes, _config)
+        return df, edges
+    except FileNotFoundError:
+        return None, None
 
 
 config = get_config()
 df, edges = get_data(config)
-feature_cols = [c for c in df.columns if c.startswith("feat_")]
+DATA_AVAILABLE = df is not None
+
+if DATA_AVAILABLE:
+    feature_cols = [c for c in df.columns if c.startswith("feat_")]
+else:
+    feature_cols = ["feat_X"] * 165
 
 
 # ── Tabs ───────────────────────────────────────────────────────────────────────
@@ -99,21 +107,35 @@ tab1, tab2, tab3 = st.tabs(["📊 Dataset Overview", "🧠 Train GNN", "📈 Com
 with tab1:
     st.header("Elliptic Bitcoin Dataset")
 
+    if not DATA_AVAILABLE:
+        st.warning("⚠️ **Demo Mode:** Raw dataset is not hosted on Streamlit Cloud due to size limits. Displaying cached metrics and figures.")
+
     # ── Key stats row ──────────────────────────────────────────────────────────
     col1, col2, col3, col4 = st.columns(4)
-    known = df[df["label"] != -1]
+    
+    if DATA_AVAILABLE:
+        known = df[df["label"] != -1]
+        n_total = len(df)
+        n_edges = "234,355"
+        n_fraud = (df["label"] == 1).sum()
+        pct_fraud = f"{n_fraud/len(known)*100:.1f}%"
+        n_unknown = (df["label"] == -1).sum()
+    else:
+        n_total = 203769
+        n_edges = "234,355"
+        n_fraud = 4545
+        pct_fraud = "9.8%"
+        n_unknown = 157205
 
     with col1:
-        st.metric("Total Transactions", f"{len(df):,}", help="Nodes in the graph")
+        st.metric("Total Transactions", f"{n_total:,}", help="Nodes in the graph")
     with col2:
-        st.metric("Total Edges", "234,355", help="Directed transaction links")
+        st.metric("Total Edges", n_edges, help="Directed transaction links")
     with col3:
-        n_fraud = (df["label"] == 1).sum()
         st.metric("Illicit (Fraud)", f"{n_fraud:,}",
-                  delta=f"{n_fraud/len(known)*100:.1f}% of labelled",
+                  delta=f"{pct_fraud} of labelled",
                   delta_color="inverse")
     with col4:
-        n_unknown = (df["label"] == -1).sum()
         st.metric("Unlabelled", f"{n_unknown:,}",
                   help="Nodes with no ground truth label")
 
@@ -125,13 +147,19 @@ with tab1:
     with col_left:
         st.subheader("Fraud Rate Over Time")
         st.caption("Each timestep = 2-week snapshot of the Bitcoin network (49 total)")
-        fig_time = plots.fraud_over_time(df)
-        st.pyplot(fig_time)
+        if DATA_AVAILABLE:
+            fig_time = plots.fraud_over_time(df)
+            st.pyplot(fig_time)
+        else:
+            st.image(str(ROOT / "outputs" / "figures" / "fraud_over_time.png"))
 
     with col_right:
         st.subheader("Label Distribution")
-        fig_dist = plots.label_distribution(df)
-        st.pyplot(fig_dist)
+        if DATA_AVAILABLE:
+            fig_dist = plots.label_distribution(df)
+            st.pyplot(fig_dist)
+        else:
+            st.image(str(ROOT / "outputs" / "figures" / "label_distribution.png"))
 
     # ── Feature info ───────────────────────────────────────────────────────────
     st.divider()
@@ -223,14 +251,22 @@ patience        : {config['gnn']['patience']}
         st.text(saved["report"])
 
         st.markdown("---")
-        if st.button(f"🔁 Retrain {model_choice.upper()}"):
-            results_path.unlink()
-            st.rerun()
+        if not DATA_AVAILABLE:
+            st.warning("⚠️ Live training is disabled because the raw dataset is not available on Streamlit Cloud.")
+            st.button(f"🔁 Retrain {model_choice.upper()}", disabled=True)
+        else:
+            if st.button(f"🔁 Retrain {model_choice.upper()}"):
+                results_path.unlink()
+                st.rerun()
 
     else:
         st.warning(f"No saved results for {model_choice.upper()}. Click below to train.")
 
-        if st.button(f"🚀 Train {model_choice.upper()} Now", type="primary"):
+        if not DATA_AVAILABLE:
+            st.error("⚠️ Cannot train: raw dataset not available on Cloud.")
+            st.button(f"🚀 Train {model_choice.upper()} Now", type="primary", disabled=True)
+        else:
+            if st.button(f"🚀 Train {model_choice.upper()} Now", type="primary"):
             from src.training.train import run_training
 
             progress_bar = st.progress(0)
