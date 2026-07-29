@@ -267,29 +267,29 @@ patience        : {config['gnn']['patience']}
             st.button(f"🚀 Train {model_choice.upper()} Now", type="primary", disabled=True)
         else:
             if st.button(f"🚀 Train {model_choice.upper()} Now", type="primary"):
-            from src.training.train import run_training
+                from src.training.train import run_training
 
-            progress_bar = st.progress(0)
-            status       = st.empty()
-            log_area     = st.empty()
+                progress_bar = st.progress(0)
+                status       = st.empty()
+                log_area     = st.empty()
 
-            status.info("⏳ Training started — this may take a few minutes...")
-            log_area.code("Initialising...")
+                status.info("⏳ Training started — this may take a few minutes...")
+                log_area.code("Initialising...")
 
-            with st.spinner("Training in progress..."):
-                results = run_training(model_choice, config)
+                with st.spinner("Training in progress..."):
+                    results = run_training(model_choice, config)
 
-            progress_bar.progress(100)
-            status.success("✅ Training complete!")
+                progress_bar.progress(100)
+                status.success("✅ Training complete!")
 
-            st.metric("F1 (macro)", f"{results['f1']:.4f}")
-            st.metric("AUC-ROC",    f"{results['auc_roc']:.4f}")
+                st.metric("F1 (macro)", f"{results['f1']:.4f}")
+                st.metric("AUC-ROC",    f"{results['auc_roc']:.4f}")
 
-            fig_curves = plots.training_curves(
-                results["train_losses"], results["val_f1s"], model_choice
-            )
-            st.pyplot(fig_curves)
-            st.rerun()
+                fig_curves = plots.training_curves(
+                    results["train_losses"], results["val_f1s"], model_choice
+                )
+                st.pyplot(fig_curves)
+                st.rerun()
 
 
 # ════════════════════════════════════════════════════════════════════════════════
