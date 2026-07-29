@@ -293,7 +293,7 @@ with tab3:
                 "F1 (macro)": f"{r['f1']:.4f}",
                 "AUC-ROC":    f"{r['auc_roc']:.4f}",
             })
-        st.dataframe(pd.DataFrame(table_data), use_container_width=True, hide_index=True)
+        st.dataframe(pd.DataFrame(table_data), width='stretch', hide_index=True)
 
         # ── Comparison bar chart ────────────────────────────────────────────────
         st.subheader("Visual Comparison")
