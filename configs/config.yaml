@@ -1,0 +1,44 @@
+# TODO: paths, GNN hyperparameters, baseline model settings, training config
+paths : 
+  raw_dir: "/Users/tusharsharma/Downloads/ML/ML_venv/GraphFraud/data/raw"
+  raw_classes: "/Users/tusharsharma/Downloads/ML/ML_venv/GraphFraud/data/raw/elliptic_txs_classes.csv"
+  raw_edgelist: "/Users/tusharsharma/Downloads/ML/ML_venv/GraphFraud/data/raw/elliptic_txs_edgelist.csv"
+  raw_features: "/Users/tusharsharma/Downloads/ML/ML_venv/GraphFraud/data/raw/elliptic_txs_features.csv"
+  processed_dir: "/Users/tusharsharma/Downloads/ML/ML_venv/GraphFraud/data/processed"
+  models_dir: "/Users/tusharsharma/Downloads/ML/ML_venv/GraphFraud/outputs/models"
+  figures_dir: "/Users/tusharsharma/Downloads/ML/ML_venv/GraphFraud/outputs/figures"
+  reports_dir: "/Users/tusharsharma/Downloads/ML/ML_venv/GraphFraud/outputs/reports"
+  notebooks_dir: "/Users/tusharsharma/Downloads/ML/ML_venv/GraphFraud/notebooks"
+labels : 
+  illicit : 1
+  licit : 0
+  unknown : -1
+graph:
+  directed: true
+
+gnn:
+  hidden_channels: 128    # doubled: more capacity to learn complex patterns
+  num_layers: 2           # reduced from 3: fewer hops → less over-smoothing from unknown nodes
+  dropout: 0.3            # keep same regularisation
+  lr: 0.01               # 10x higher: faster convergence on this dataset
+  weight_decay: 0.00001   # L2 regularisation unchanged
+  epochs: 300             # more budget: give models time to converge
+  patience: 40            # more patience: don't stop too early
+
+baseline:
+  xgboost:
+    n_estimators: 200
+    max_depth: 6
+    learning_rate: 0.05
+    scale_pos_weight: 9   # ~9x more licit than illicit rows — corrects class imbalance
+  lightgbm:
+    n_estimators: 300
+    num_leaves: 63
+    learning_rate: 0.05
+    class_weight: "balanced"
+
+training:
+  test_size: 0.2        # 20% held out for final evaluation
+  val_size: 0.1         # 10% used for validation during training
+  random_seed: 42       # fixes all randomness — makes results reproducible
+  device: "cpu"         # switch to "cuda" if you have a GPU
