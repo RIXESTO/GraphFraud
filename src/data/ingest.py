@@ -1,8 +1,18 @@
 import pandas as pd
 import yaml
+from pathlib import Path
 
-def load_config(config_path):
-    return yaml.safe_load(open(config_path,"r"))
+from src.data.download import get_project_root, resolve_paths
+
+
+def load_config(config_path, root=None):
+    root = root or get_project_root()
+    path = Path(config_path)
+    if not path.is_absolute():
+        path = root / path
+    with open(path) as f:
+        config = yaml.safe_load(f)
+    return resolve_paths(config, root)
 
 def load_raw(config):
     classes_path = config["paths"]["raw_classes"]

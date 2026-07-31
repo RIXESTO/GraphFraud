@@ -28,6 +28,7 @@ ROOT = Path(__file__).resolve().parents[1]   # GraphFraud/
 sys.path.insert(0, str(ROOT))
 
 from src.data.ingest    import load_config, load_raw, build_graph_df
+from src.data.download  import ensure_dataset
 from src.visualization  import plots
 
 # ── Page config ───────────────────────────────────────────────────────────────
@@ -68,10 +69,10 @@ def get_config():
     @st.cache_resource: runs once, then caches the result.
     Without caching, config would reload on every user interaction.
     """
-    return load_config(str(ROOT / "configs" / "config.yaml"))
+    return load_config(str(ROOT / "configs" / "config.yaml"), root=ROOT)
 
 
-@st.cache_data
+@st.cache_data(show_spinner="Loading dataset (downloads from Hugging Face on first run, ~665 MB)...")
 def get_data(_config):
     """
     @st.cache_data: caches data across reruns.
@@ -79,6 +80,8 @@ def get_data(_config):
     every time the user clicks a button.
     The leading underscore in `_config` tells Streamlit not to hash this argument.
     """
+    if not ensure_dataset(_config, root=ROOT):
+        return None, None
     try:
         classes, edges, features = load_raw(_config)
         df = build_graph_df(features, classes, _config)
@@ -108,7 +111,12 @@ with tab1:
     st.header("Elliptic Bitcoin Dataset")
 
     if not DATA_AVAILABLE:
-        st.warning("⚠️ **Demo Mode:** Raw dataset is not hosted on Streamlit Cloud due to size limits. Displaying cached metrics and figures.")
+        repo_id = config.get("huggingface", {}).get("repo_id", "RIXESTO/elliptic-bitcoin")
+        st.warning(
+            f"⚠️ **Dataset unavailable.** Could not load local files or download from "
+            f"[Hugging Face](https://huggingface.co/datasets/{repo_id}). "
+            "Displaying cached metrics and figures."
+        )
 
     # ── Key stats row ──────────────────────────────────────────────────────────
     col1, col2, col3, col4 = st.columns(4)
@@ -252,7 +260,7 @@ patience        : {config['gnn']['patience']}
 
         st.markdown("---")
         if not DATA_AVAILABLE:
-            st.warning("⚠️ Live training is disabled because the raw dataset is not available on Streamlit Cloud.")
+            st.warning("⚠️ Live training is disabled because the dataset could not be loaded.")
             st.button(f"🔁 Retrain {model_choice.upper()}", disabled=True)
         else:
             if st.button(f"🔁 Retrain {model_choice.upper()}"):
@@ -263,7 +271,7 @@ patience        : {config['gnn']['patience']}
         st.warning(f"No saved results for {model_choice.upper()}. Click below to train.")
 
         if not DATA_AVAILABLE:
-            st.error("⚠️ Cannot train: raw dataset not available on Cloud.")
+            st.error("⚠️ Cannot train: dataset not available.")
             st.button(f"🚀 Train {model_choice.upper()} Now", type="primary", disabled=True)
         else:
             if st.button(f"🚀 Train {model_choice.upper()} Now", type="primary"):

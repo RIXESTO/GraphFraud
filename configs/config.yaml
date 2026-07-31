@@ -1,14 +1,18 @@
 # TODO: paths, GNN hyperparameters, baseline model settings, training config
 paths : 
-  raw_dir: "/Users/tusharsharma/Downloads/ML/ML_venv/GraphFraud/data/raw"
-  raw_classes: "/Users/tusharsharma/Downloads/ML/ML_venv/GraphFraud/data/raw/elliptic_txs_classes.csv"
-  raw_edgelist: "/Users/tusharsharma/Downloads/ML/ML_venv/GraphFraud/data/raw/elliptic_txs_edgelist.csv"
-  raw_features: "/Users/tusharsharma/Downloads/ML/ML_venv/GraphFraud/data/raw/elliptic_txs_features.csv"
-  processed_dir: "/Users/tusharsharma/Downloads/ML/ML_venv/GraphFraud/data/processed"
-  models_dir: "/Users/tusharsharma/Downloads/ML/ML_venv/GraphFraud/outputs/models"
-  figures_dir: "/Users/tusharsharma/Downloads/ML/ML_venv/GraphFraud/outputs/figures"
-  reports_dir: "/Users/tusharsharma/Downloads/ML/ML_venv/GraphFraud/outputs/reports"
-  notebooks_dir: "/Users/tusharsharma/Downloads/ML/ML_venv/GraphFraud/notebooks"
+  raw_dir: "data/raw"
+  raw_classes: "data/raw/elliptic_txs_classes.csv"
+  raw_edgelist: "data/raw/elliptic_txs_edgelist.csv"
+  raw_features: "data/raw/elliptic_txs_features.csv"
+  processed_dir: "data/processed"
+  models_dir: "outputs/models"
+  figures_dir: "outputs/figures"
+  reports_dir: "outputs/reports"
+  notebooks_dir: "notebooks"
+
+huggingface:
+  repo_id: "RIXESTO/elliptic-bitcoin"
+
 labels : 
   illicit : 1
   licit : 0

@@ -58,7 +58,29 @@ GraphFraud is a complete machine learning pipeline that detects fraudulent Bitco
 ### Prerequisites
 
 - Python 3.10+
-- [Elliptic Bitcoin Dataset](https://www.kaggle.com/datasets/ellipticco/elliptic-data-set) placed in `data/raw/`
+- Elliptic Bitcoin Dataset — either:
+  - **Option A (local):** download from [Kaggle](https://www.kaggle.com/datasets/ellipticco/elliptic-data-set) into `data/raw/`
+  - **Option B (automatic):** skip manual download — the app fetches CSVs from [Hugging Face](https://huggingface.co/datasets/RIXESTO/elliptic-bitcoin) on first run (~665 MB)
+
+### One-time: upload dataset to Hugging Face
+
+If you cloned this repo and already have the Kaggle CSVs locally, publish them once so Streamlit Cloud can download them:
+
+```bash
+pip install huggingface_hub
+huggingface-cli login          # create a free account at huggingface.co if needed
+python scripts/upload_to_huggingface.py
+```
+
+This creates/updates the public dataset repo configured in `configs/config.yaml` (`huggingface.repo_id`).
+
+To use a different Hugging Face account or repo name:
+
+```bash
+python scripts/upload_to_huggingface.py --repo-id YOUR_USERNAME/elliptic-bitcoin
+```
+
+Then set `huggingface.repo_id` in `configs/config.yaml` to match.
 
 ### Installation
 
