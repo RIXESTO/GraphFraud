@@ -11,7 +11,7 @@ paths :
   notebooks_dir: "notebooks"
 
 huggingface:
-  repo_id: "RIXESTO/elliptic-bitcoin"
+  repo_id: "TuSh006/elliptic-bitcoin"
 
 labels : 
   illicit : 1
