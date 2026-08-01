@@ -35,9 +35,9 @@ GraphFraud is a complete machine learning pipeline that detects fraudulent Bitco
 |---|---|---|---|---|---|
 | **LightGBM** | Baseline | **0.9794** | **0.9985** | — | — |
 | XGBoost | Baseline | 0.9643 | 0.9971 | — | — |
-| **GraphSAGE** | GNN | **0.9329** | **0.9860** | **0.9201** | 89.1% |
-| GCN | GNN | 0.8533 | 0.9730 | 0.8614 | 88.3% |
-| GAT | GNN | 0.8306 | 0.9797 | 0.8477 | **92.9%** |
+| **GraphSAGE** | GNN | **0.9329** | **0.9860** | **0.9426** | 89.1% |
+| GAT | GNN | 0.8306 | 0.9797 | 0.9015 | **92.9%** |
+| GCN | GNN | 0.8533 | 0.9730 | 0.8448 | 88.3% |
 
 > **Why AUC-PR?** With only 9.8% fraud, AUC-ROC is inflated by the easy licit majority. AUC-PR (Area Under Precision-Recall Curve) only measures performance on the rare fraud class — a random classifier scores ≈ 0.098 here. GNNs score 0.84–0.92, showing genuine fraud discrimination ability.
 

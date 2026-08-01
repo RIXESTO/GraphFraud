@@ -518,5 +518,6 @@
     0.8141037193721317,
     0.8141037193721317
   ],
-  "report": "              precision    recall  f1-score   support\n\n           0     0.9917    0.9236    0.9564      8404\n           1     0.5680    0.9285    0.7048       909\n\n    accuracy                         0.9241      9313\n   macro avg     0.7798    0.9261    0.8306      9313\nweighted avg     0.9503    0.9241    0.9319      9313\n"
+  "report": "              precision    recall  f1-score   support\n\n           0     0.9917    0.9236    0.9564      8404\n           1     0.5680    0.9285    0.7048       909\n\n    accuracy                         0.9241      9313\n   macro avg     0.7798    0.9261    0.8306      9313\nweighted avg     0.9503    0.9241    0.9319      9313\n",
+  "auc_pr": 0.9014938163877356
 }
