@@ -272,14 +272,6 @@ patience        : {config['gnn']['patience']}
         st.subheader("Classification Report")
         st.text(saved["report"])
 
-        st.markdown("---")
-        if not DATA_AVAILABLE:
-            st.warning("⚠️ Live training is disabled because the dataset could not be loaded.")
-            st.button(f"🔁 Retrain {model_choice.upper()}", disabled=True)
-        else:
-            if st.button(f"🔁 Retrain {model_choice.upper()}"):
-                results_path.unlink()
-                st.rerun()
 
     else:
         st.warning(f"No saved results for {model_choice.upper()}. Click below to train.")
