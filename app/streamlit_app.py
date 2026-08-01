@@ -372,14 +372,7 @@ with tab3:
                     auc_pr_val = result.get("auc_pr")
                     st.metric("AUC-PR",   f"{auc_pr_val:.4f}" if auc_pr_val else "—")
                     st.metric("Epochs",   result["epochs_run"])
-                    beats_lgbm_f1  = result["f1"]      > 0.9794
-                    beats_lgbm_auc = result["auc_roc"] > 0.9985
-                    if beats_lgbm_f1 and beats_lgbm_auc:
-                        st.success("Beats LightGBM on both! 🎉")
-                    elif beats_lgbm_f1 or beats_lgbm_auc:
-                        st.info("Beats LightGBM on one metric")
-                    else:
-                        st.error("Below LightGBM baseline")
+
 
             # ── Confusion matrices side by side ─────────────────────────────────
             st.subheader("Confusion Matrices")
