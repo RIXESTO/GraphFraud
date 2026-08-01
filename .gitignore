@@ -1,2 +1,28 @@
+# Dataset (too large for Git — download from Kaggle or Hugging Face)
 /data/
+
+# Local-only docs
 README_GITHUB.md
+
+# macOS metadata
+.DS_Store
+**/.DS_Store
+
+# Python bytecode
+__pycache__/
+**/__pycache__/
+*.py[cod]
+
+# Streamlit Cloud log files
+logs-*.txt
+
+# Virtual environment
+venv/
+.venv/
+ML_venv/
+
+# pytest
+.pytest_cache/
+
+# Jupyter
+.ipynb_checkpoints/

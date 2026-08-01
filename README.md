@@ -31,13 +31,15 @@ GraphFraud is a complete machine learning pipeline that detects fraudulent Bitco
 
 ### Final Model Comparison
 
-| Model | Type | F1 (macro) ↑ | AUC-ROC ↑ | Fraud Recall |
-|---|---|---|---|---|
-| **LightGBM** | Baseline | **0.9794** | **0.9985** | — |
-| XGBoost | Baseline | 0.9643 | 0.9971 | — |
-| **GraphSAGE** | GNN | **0.9329** | **0.9860** | 89.1% |
-| GCN | GNN | 0.8533 | 0.9730 | 88.3% |
-| GAT | GNN | 0.8306 | 0.9797 | **92.9%** |
+| Model | Type | F1 (macro) ↑ | AUC-ROC ↑ | AUC-PR ↑ | Fraud Recall |
+|---|---|---|---|---|---|
+| **LightGBM** | Baseline | **0.9794** | **0.9985** | — | — |
+| XGBoost | Baseline | 0.9643 | 0.9971 | — | — |
+| **GraphSAGE** | GNN | **0.9329** | **0.9860** | **0.9201** | 89.1% |
+| GCN | GNN | 0.8533 | 0.9730 | 0.8614 | 88.3% |
+| GAT | GNN | 0.8306 | 0.9797 | 0.8477 | **92.9%** |
+
+> **Why AUC-PR?** With only 9.8% fraud, AUC-ROC is inflated by the easy licit majority. AUC-PR (Area Under Precision-Recall Curve) only measures performance on the rare fraud class — a random classifier scores ≈ 0.098 here. GNNs score 0.84–0.92, showing genuine fraud discrimination ability.
 
 **Findings:**
 - **GraphSAGE** is the strongest GNN, approaching tabular baseline performance (F1 0.9329 vs. 0.9794).
@@ -50,6 +52,18 @@ GraphFraud is a complete machine learning pipeline that detects fraudulent Bitco
 <p align="center">
   <img src="outputs/figures/training_curves_sage.png" alt="GraphSAGE Training Curves" width="700"/>
 </p>
+
+---
+
+## Dashboard
+
+<p align="center">
+  <img src="outputs/figures/dashboard_screenshot.png" alt="Streamlit Dashboard" width="700"/>
+</p>
+
+An interactive **Streamlit dashboard** lets you explore the dataset, train any of the three GNNs in one click, and compare all models side by side — including AUC-PR, confusion matrices, and training curves.
+
+**Live demo:** [graphfraud.streamlit.app](https://rixesto-graphfraud.streamlit.app) *(dataset streams from Hugging Face on first load, ~30 s)*
 
 ---
 

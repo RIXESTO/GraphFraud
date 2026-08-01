@@ -264,6 +264,7 @@ def run_training(model_name, config):
         "model":        model_name,
         "f1":           float(test_metrics["f1"]),
         "auc_roc":      float(test_metrics["auc_roc"]),
+        "auc_pr":       float(test_metrics["auc_pr"]),
         "best_val_f1":  float(best_val_f1),
         "epochs_run":   epoch,
         "train_losses": train_losses,

@@ -3,6 +3,7 @@ import numpy as np
 from sklearn.metrics import (
     f1_score,
     roc_auc_score,
+    average_precision_score,
     classification_report,
     confusion_matrix,
 )
@@ -77,6 +78,15 @@ def evaluate_gnn(model, data, mask, device):
         # AUC-ROC: Area Under the ROC Curve
         # Measures how well the model RANKS fraud above licit (order matters)
         # 1.0 = perfect, 0.5 = random guessing
+
+        "auc_pr":           average_precision_score(y_true, y_prob),
+        # AUC-PR: Area Under the Precision-Recall Curve
+        # The PRIMARY metric for severely imbalanced data (9.8% fraud).
+        # AUC-ROC can look artificially high because it rewards the model for
+        # correctly classifying the easy 90% licit majority. AUC-PR only cares
+        # about how well the model finds the rare positive (fraud) class.
+        # A random classifier scores ~0.098 (the fraud base rate) here.
+        # A perfect classifier scores 1.0.
 
         "report":           classification_report(y_true, y_pred, digits=4),
         # Precision, recall, F1 per class — detailed breakdown

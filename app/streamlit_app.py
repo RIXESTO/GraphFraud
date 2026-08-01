@@ -246,14 +246,28 @@ patience        : {config['gnn']['patience']}
 
         st.success(f"✅ Pre-trained results found for {model_choice.upper()}")
 
-        m1, m2, m3 = st.columns(3)
-        m1.metric("F1 (macro)",    f"{saved['f1']:.4f}")
-        m2.metric("AUC-ROC",       f"{saved['auc_roc']:.4f}")
-        m3.metric("Epochs run",    saved["epochs_run"])
+        m1, m2, m3, m4 = st.columns(4)
+        m1.metric("F1 (macro)", f"{saved['f1']:.4f}")
+        m2.metric("AUC-ROC",    f"{saved['auc_roc']:.4f}")
+        m3.metric("AUC-PR",     f"{saved['auc_pr']:.4f}" if "auc_pr" in saved else "—",
+                  help="Area Under Precision-Recall Curve — the primary metric for imbalanced data. "
+                       "Random baseline ≈ 0.098 (the fraud rate).")
+        m4.metric("Epochs run", saved["epochs_run"])
 
         st.subheader("Training Curves")
         fig_curves = plots.training_curves(saved["train_losses"], saved["val_f1s"], model_choice)
         st.pyplot(fig_curves)
+
+        # ── Confusion matrix ────────────────────────────────────────────────────
+        cm_path = ROOT / "outputs" / "figures" / f"confusion_matrix_{model_choice}.png"
+        if cm_path.exists():
+            st.subheader("Confusion Matrix")
+            st.caption(
+                "Rows = actual class, Columns = predicted class. "
+                "Off-diagonal entries are errors: top-right = false alarms (licit flagged as fraud), "
+                "bottom-left = missed fraud (most costly)."
+            )
+            st.image(str(cm_path))
 
         st.subheader("Classification Report")
         st.text(saved["report"])
@@ -292,6 +306,7 @@ patience        : {config['gnn']['patience']}
 
                 st.metric("F1 (macro)", f"{results['f1']:.4f}")
                 st.metric("AUC-ROC",    f"{results['auc_roc']:.4f}")
+                st.metric("AUC-PR",     f"{results['auc_pr']:.4f}" if "auc_pr" in results else "—")
 
                 fig_curves = plots.training_curves(
                     results["train_losses"], results["val_f1s"], model_choice
@@ -322,8 +337,8 @@ with tab3:
         st.subheader("Results Table")
 
         baselines = {
-            "XGBoost":  {"f1": 0.9643, "auc_roc": 0.9971, "type": "Baseline"},
-            "LightGBM": {"f1": 0.9794, "auc_roc": 0.9985, "type": "Baseline"},
+            "XGBoost":  {"f1": 0.9643, "auc_roc": 0.9971, "auc_pr": None, "type": "Baseline"},
+            "LightGBM": {"f1": 0.9794, "auc_roc": 0.9985, "auc_pr": None, "type": "Baseline"},
         }
         gnn_rows = {k: {**v, "type": "GNN"} for k, v in gnn_results.items()}
         all_results = {**baselines, **gnn_rows}
@@ -331,13 +346,21 @@ with tab3:
         import pandas as pd
         table_data = []
         for name, r in all_results.items():
+            auc_pr_val = r.get("auc_pr")
             table_data.append({
-                "Model":    name.upper(),
-                "Type":     r["type"],
+                "Model":      name.upper(),
+                "Type":       r["type"],
                 "F1 (macro)": f"{r['f1']:.4f}",
                 "AUC-ROC":    f"{r['auc_roc']:.4f}",
+                "AUC-PR ↑":   f"{auc_pr_val:.4f}" if auc_pr_val is not None else "—",
             })
         st.dataframe(pd.DataFrame(table_data), width='stretch', hide_index=True)
+        st.caption(
+            "**AUC-PR** (Area Under Precision-Recall Curve) is the primary metric for this "
+            "9.8%-fraud dataset. AUC-ROC is inflated by the easy licit majority; "
+            "AUC-PR reveals true discrimination power on the rare fraud class. "
+            "Random baseline ≈ 0.098."
+        )
 
         # ── Comparison bar chart ────────────────────────────────────────────────
         st.subheader("Visual Comparison")
@@ -352,9 +375,11 @@ with tab3:
             for i, (name, result) in enumerate(gnn_results.items()):
                 with cols[i]:
                     st.markdown(f"**{name.upper()}**")
-                    st.metric("F1",        f"{result['f1']:.4f}")
-                    st.metric("AUC-ROC",   f"{result['auc_roc']:.4f}")
-                    st.metric("Epochs",    result["epochs_run"])
+                    st.metric("F1",       f"{result['f1']:.4f}")
+                    st.metric("AUC-ROC",  f"{result['auc_roc']:.4f}")
+                    auc_pr_val = result.get("auc_pr")
+                    st.metric("AUC-PR",   f"{auc_pr_val:.4f}" if auc_pr_val else "—")
+                    st.metric("Epochs",   result["epochs_run"])
                     beats_lgbm_f1  = result["f1"]      > 0.9794
                     beats_lgbm_auc = result["auc_roc"] > 0.9985
                     if beats_lgbm_f1 and beats_lgbm_auc:
@@ -363,3 +388,16 @@ with tab3:
                         st.info("Beats LightGBM on one metric")
                     else:
                         st.error("Below LightGBM baseline")
+
+            # ── Confusion matrices side by side ─────────────────────────────────
+            st.subheader("Confusion Matrices")
+            st.caption("Rows = actual, Columns = predicted. Bottom-left = missed fraud (false negatives = most costly).")
+            cm_cols = st.columns(len(gnn_results))
+            for i, (name, _) in enumerate(gnn_results.items()):
+                cm_path = ROOT / "outputs" / "figures" / f"confusion_matrix_{name}.png"
+                with cm_cols[i]:
+                    st.markdown(f"**{name.upper()}**")
+                    if cm_path.exists():
+                        st.image(str(cm_path))
+                    else:
+                        st.info("Image not found")
